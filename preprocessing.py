@@ -17,16 +17,17 @@ class Preprocessing:
         self.transcript = transcript
 
     def run(self) -> pd.DataFrame:
-        self._fill_na_gender()
+        self._impute_profile_data()
         self._clean_dict_keys()
         self._add_offer_details()
         self._take_completion_reward_out()
         self._sort()
+        return self._combine_transcript_with_profile()
 
-        return self.transcript
-
-    def _fill_na_gender(self):
+    def _impute_profile_data(self):
         self.profile['gender'].fillna('O', inplace=True)
+        # it is highly likely that users with this age didn't agree to providing information of their age
+        self.profile.loc[self.profile['age'] == 118, 'age'] = np.nan
 
     def _clean_dict_keys(self):
         def remove_white_space_in_value_key(value: dict):
@@ -72,3 +73,12 @@ class Preprocessing:
     def _sort(self):
         self.transcript.sort_values(['person', 'time'], ascending=[True, True], inplace=True)
         self.transcript.reset_index(drop=True, inplace=True)
+
+    def _combine_transcript_with_profile(self):
+        return (self.transcript.merge(self.profile,left_on='person',right_on='id',how='left')
+                .drop(columns=['id', 'value'])
+                .rename(columns={'person': 'user_id',
+                                 'age': 'user_age',
+                                 'gender': 'user_gender',
+                                 'income': 'user_income',
+                                 'became_member_on': 'user_became_member_on'}))
