@@ -28,6 +28,8 @@ class Preprocessing:
         self.profile['gender'] = self.profile['gender'].fillna('O')
         # it is highly likely that users with this age didn't agree to providing information of their age
         self.profile.loc[self.profile['age'] == 118, 'age'] = np.nan
+        self.profile['age'] = self.profile['age'].fillna(self.profile['age'].median())
+        self.profile['income'] = self.profile['income'].fillna(self.profile['income'].median())
 
     def _clean_dict_keys(self):
         def remove_white_space_in_value_key(value: dict):
