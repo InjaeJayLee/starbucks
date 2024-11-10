@@ -60,7 +60,7 @@ class Preprocessing:
         self.transcript.loc[offer_flags, 'offer_difficulty'] = self.transcript.loc[offer_flags, 'value'].apply(
             lambda x: get_offer_detail(x['offer_id'], 'difficulty'))
         self.transcript.loc[offer_flags, 'offer_duration'] = self.transcript.loc[offer_flags, 'value'].apply(
-            lambda x: get_offer_detail(x['offer_id'], 'duration'))
+            lambda x: 24 * get_offer_detail(x['offer_id'], 'duration'))
         self.transcript.loc[offer_flags, 'offer_type'] = self.transcript.loc[offer_flags, 'value'].apply(
             lambda x: get_offer_detail(x['offer_id'], 'offer_type'))
 
