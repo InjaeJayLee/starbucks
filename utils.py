@@ -24,9 +24,27 @@ def evaluate_offers(transcript: pd.DataFrame):
 
     transcript_received = transcript.loc[transcript['event'] == 'offer received'].reset_index(drop=True)
 
-    results = pd.merge(transcript_received, offer_results, on=['user_id', 'offer_id'], how='left')
-    columns = results.columns
-    reorder_cols = ['user_id', 'offer_id', 'offer_result']
+    return pd.merge(transcript_received, offer_results, on=['user_id', 'offer_id'], how='left')
+
+
+def create_dataset(offer_results: pd.DataFrame):
+    offer_results['target'] = offer_results['offer_result'].apply(lambda x: 1 if x == 'offer worked' else 0)
+
+    columns = offer_results.columns
+    reorder_cols = ['target']
     reorder_cols.extend([c for c in columns if c not in reorder_cols])
-    results = results[reorder_cols].drop(columns=['event'])
-    return results
+
+    offer_results['channel_email'] = 0
+    offer_results['channel_mobile'] = 0
+    offer_results['channel_social'] = 0
+    offer_results['channel_web'] = 0
+    offer_results['channel_email'] = offer_results['offer_channels'].apply(lambda x: int('email' in x))
+    offer_results['channel_mobile'] = offer_results['offer_channels'].apply(lambda x: int('mobile' in x))
+    offer_results['channel_social'] = offer_results['offer_channels'].apply(lambda x: int('social' in x))
+    offer_results['channel_web'] = offer_results['offer_channels'].apply(lambda x: int('web' in x))
+
+    offer_results.drop(columns=['event', 'user_id', 'offer_id', 'actual_reward', 'offer_channels',
+                                'user_became_member_on', 'offer_result', 'time'],
+                       inplace=True)
+
+    return pd.get_dummies(offer_results, drop_first=True, columns=['user_gender', 'offer_type'])

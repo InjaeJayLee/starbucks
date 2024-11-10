@@ -25,7 +25,7 @@ class Preprocessing:
         return self._combine_transcript_with_profile()
 
     def _impute_profile_data(self):
-        self.profile['gender'].fillna('O', inplace=True)
+        self.profile['gender'] = self.profile['gender'].fillna('O')
         # it is highly likely that users with this age didn't agree to providing information of their age
         self.profile.loc[self.profile['age'] == 118, 'age'] = np.nan
 
